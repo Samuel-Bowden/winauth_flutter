@@ -6,7 +6,7 @@
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<String> performNtlmRequest({
+Future<Response> performNtlmRequest({
   required Method method,
   required String url,
   required List<(String, String)> headers,
@@ -17,3 +17,21 @@ Future<String> performNtlmRequest({
 );
 
 enum Method { get_ }
+
+class Response {
+  final int status;
+  final String body;
+
+  const Response({required this.status, required this.body});
+
+  @override
+  int get hashCode => status.hashCode ^ body.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Response &&
+          runtimeType == other.runtimeType &&
+          status == other.status &&
+          body == other.body;
+}

@@ -5,7 +5,12 @@ pub enum Method {
     Get,
 }
 
-pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, String)]) -> Result<String> {
+pub struct Response {
+    pub status: u16,
+    pub body: String,
+}
+
+pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, String)]) -> Result<Response> {
     let client = reqwest::blocking::Client::new();
 
     let mut out_resp: Option<winauth::http::Response> = None;
@@ -54,7 +59,12 @@ pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, Str
         }
     };
 
-    res.text().context("Failed to unwrap response body")
+    Ok(
+        Response {
+            status: res.status().as_u16(),
+            body: res.text()?
+        }
+    )
 }
 
 #[flutter_rust_bridge::frb(init)]
