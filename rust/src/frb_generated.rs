@@ -106,20 +106,27 @@ fn wire__crate__api__perform_ntlm_request_impl(
             let api_headers = <Vec<(String, String)>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, ()>((move || {
-                    let output_ok = Result::<_, ()>::Ok(crate::api::perform_ntlm_request(
-                        api_method,
-                        api_url,
-                        &api_headers,
-                    ))?;
-                    Ok(output_ok)
-                })())
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok =
+                            crate::api::perform_ntlm_request(api_method, api_url, &api_headers)?;
+                        Ok(output_ok)
+                    })(),
+                )
             }
         },
     )
 }
 
 // Section: dart2rust
+
+impl SseDecode for flutter_rust_bridge::for_generated::anyhow::Error {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <String>::sse_decode(deserializer);
+        return flutter_rust_bridge::for_generated::anyhow::anyhow!("{}", inner);
+    }
+}
 
 impl SseDecode for String {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -241,6 +248,13 @@ impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api:
 impl flutter_rust_bridge::IntoIntoDart<crate::api::Method> for crate::api::Method {
     fn into_into_dart(self) -> crate::api::Method {
         self
+    }
+}
+
+impl SseEncode for flutter_rust_bridge::for_generated::anyhow::Error {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(format!("{:?}", self), serializer);
     }
 }
 

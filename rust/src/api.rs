@@ -1,18 +1,18 @@
+use anyhow::{Context, Result, anyhow};
 use winauth::http::Authenticator;
 
 pub enum Method {
     Get,
 }
 
-pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, String)]) -> String {
+pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, String)]) -> Result<String> {
     let client = reqwest::blocking::Client::new();
 
     let mut out_resp: Option<winauth::http::Response> = None;
 
     let mut sspi = winauth::windows::NtlmSspiBuilder::new()
         .outbound()
-        .build()
-        .unwrap();
+        .build()?;
 
     let res = loop {        
         let mut builder = client.request(
@@ -32,7 +32,7 @@ pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, Str
             }
         }
 
-        let res = builder.send().expect("Failed to send request");
+        let res = builder.send().context("Failed to send request")?;
 
         let ret = sspi
             .http_outgoing_auth(|header| {
@@ -42,8 +42,8 @@ pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, Str
                     .into_iter()
                     .map(|x| x.to_str().unwrap())
                     .collect())
-            })
-            .unwrap();
+            }).map_err(|e| anyhow!(e.to_string()))?;
+
         match ret {
             winauth::http::AuthState::Response(resp) => {
                 out_resp = Some(resp);
@@ -54,7 +54,7 @@ pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, Str
         }
     };
 
-    res.text().expect("Failed to get request body")
+    res.text().context("Failed to unwrap response body")
 }
 
 #[flutter_rust_bridge::frb(init)]
