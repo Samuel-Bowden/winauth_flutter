@@ -1,4 +1,4 @@
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use winauth::http::Authenticator;
 
 pub enum Method {
@@ -10,8 +10,15 @@ pub struct Response {
     pub body: String,
 }
 
-pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, String)], accept_invalid_cert: bool) -> Result<Response> {
-    let client = reqwest::blocking::Client::builder().danger_accept_invalid_certs(accept_invalid_cert).build()?;
+pub fn perform_ntlm_request(
+    method: Method,
+    url: String,
+    headers: &[(String, String)],
+    accept_invalid_cert: bool,
+) -> Result<Response> {
+    let client = reqwest::blocking::Client::builder()
+        .danger_accept_invalid_certs(accept_invalid_cert)
+        .build()?;
 
     let mut out_resp: Option<winauth::http::Response> = None;
 
@@ -19,7 +26,7 @@ pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, Str
         .outbound()
         .build()?;
 
-    let res = loop {        
+    let res = loop {
         let mut builder = client.request(
             match method {
                 Method::Get => reqwest::Method::GET,
@@ -47,7 +54,8 @@ pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, Str
                     .into_iter()
                     .map(|x| x.to_str().unwrap())
                     .collect())
-            }).map_err(|e| anyhow!(e.to_string()))?;
+            })
+            .map_err(|e| anyhow!(e.to_string()))?;
 
         match ret {
             winauth::http::AuthState::Response(resp) => {
@@ -59,12 +67,10 @@ pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, Str
         }
     };
 
-    Ok(
-        Response {
-            status: res.status().as_u16(),
-            body: res.text()?
-        }
-    )
+    Ok(Response {
+        status: res.status().as_u16(),
+        body: res.text()?,
+    })
 }
 
 #[flutter_rust_bridge::frb(init)]
