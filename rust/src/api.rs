@@ -10,8 +10,8 @@ pub struct Response {
     pub body: String,
 }
 
-pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, String)]) -> Result<Response> {
-    let client = reqwest::blocking::Client::new();
+pub fn perform_ntlm_request(method: Method, url: String, headers: &[(String, String)], accept_invalid_cert: bool) -> Result<Response> {
+    let client = reqwest::blocking::Client::builder().danger_accept_invalid_certs(accept_invalid_cert).build()?;
 
     let mut out_resp: Option<winauth::http::Response> = None;
 

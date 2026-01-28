@@ -83,6 +83,7 @@ abstract class RustLibApi extends BaseApi {
     required Method method,
     required String url,
     required List<(String, String)> headers,
+    required bool acceptInvalidCert,
   });
 }
 
@@ -126,6 +127,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required Method method,
     required String url,
     required List<(String, String)> headers,
+    required bool acceptInvalidCert,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -134,6 +136,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_method(method, serializer);
           sse_encode_String(url, serializer);
           sse_encode_list_record_string_string(headers, serializer);
+          sse_encode_bool(acceptInvalidCert, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -146,7 +149,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateApiPerformNtlmRequestConstMeta,
-        argValues: [method, url, headers],
+        argValues: [method, url, headers, acceptInvalidCert],
         apiImpl: this,
       ),
     );
@@ -154,7 +157,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiPerformNtlmRequestConstMeta => const TaskConstMeta(
     debugName: "perform_ntlm_request",
-    argNames: ["method", "url", "headers"],
+    argNames: ["method", "url", "headers", "acceptInvalidCert"],
   );
 
   @protected
@@ -167,6 +170,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   String dco_decode_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as String;
+  }
+
+  @protected
+  bool dco_decode_bool(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as bool;
   }
 
   @protected
@@ -248,6 +257,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  bool sse_decode_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getInt32();
@@ -317,12 +332,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  bool sse_decode_bool(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint8() != 0;
-  }
-
-  @protected
   void sse_encode_AnyhowException(
     AnyhowException self,
     SseSerializer serializer,
@@ -335,6 +344,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_String(String self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer);
+  }
+
+  @protected
+  void sse_encode_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint8(self ? 1 : 0);
   }
 
   @protected
@@ -403,11 +418,5 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_encode_unit(void self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-  }
-
-  @protected
-  void sse_encode_bool(bool self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint8(self ? 1 : 0);
   }
 }

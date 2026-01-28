@@ -10,10 +10,12 @@ Future<Response> performNtlmRequest({
   required Method method,
   required String url,
   required List<(String, String)> headers,
+  required bool acceptInvalidCert,
 }) => RustLib.instance.api.crateApiPerformNtlmRequest(
   method: method,
   url: url,
   headers: headers,
+  acceptInvalidCert: acceptInvalidCert,
 );
 
 enum Method { get_ }
