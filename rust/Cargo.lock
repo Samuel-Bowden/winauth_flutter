@@ -1660,8 +1660,7 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 [[package]]
 name = "winauth"
 version = "0.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e03c9d0fde636447315ff38695b14c85c6ccc738ade05a400a3ce568a557021"
+source = "git+https://github.com/Sam-Bowden/winauth-rs?branch=fix%2Fisc-req-flags-compat#76aaf30f4bc846659e2f3f9177f551fe00f9a81f"
 dependencies = [
  "base64 0.10.1",
  "bitflags 1.3.2",

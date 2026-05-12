@@ -8,7 +8,7 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 flutter_rust_bridge = "=2.11.1"
-winauth = "0.0.5"
+winauth = { git = "https://github.com/Sam-Bowden/winauth-rs", branch = "fix/isc-req-flags-compat" }
 reqwest = { version = "0.12.26", default-features = false, features = ["blocking", "rustls-tls"]}
 anyhow = "1.0.100"
 
